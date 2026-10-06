@@ -5,7 +5,7 @@ Your Smart Personal Learning Assistant
 **https://pocket-smart-ai-nxaz.onrender.com**
 
 ### 🎥 Demo Video:
-[Un Drive Link-a Inga Paste Pannu]
+https://drive.google.com/file/d/1q4mpTqwZjaWLG4ggdDJC4D0kBvrjbtpH/view?usp=drivesdk
 
 ### ✨ Features
 - Ask any doubt to AI
