@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduGenie AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            padding: 40px 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 42px;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0;
+            color: #312e81;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            resize: vertical;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #4f46e5;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #4f46e5;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #3730a3;
+            transform: translateY(-2px);
+        }
+
+        .recommendation {
+            grid-column: span 2;
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 25px;
+            color: #4f46e5;
+            font-weight: bold;
+        }
+
+        #answerBox {
+            display: none;
+            margin-top: 28px;
+            padding: 24px;
+            background: #f8faff;
+            border: 1px solid #dbeafe;
+            border-radius: 14px;
+        }
+
+        #answerBox h3 {
+            margin-top: 0;
+            color: #312e81;
+        }
+
+        #answer {
+            white-space: pre-wrap;
+            line-height: 1.7;
+            color: #334155;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .container {
+                padding: 22px;
+            }
+
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .recommendation {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">🤖</div>
+
+    <h1>EduGenie AI</h1>
+
+    <p class="subtitle">
+        Your AI-powered learning assistant
+    </p>
+
+    <textarea
+        id="question"
+        placeholder="Enter your question, topic, or text here..."
+    ></textarea>
+
+    <div class="button-grid">
+
+        <button onclick="askGemini()">
+            🤖 Ask Gemini
+        </button>
+
+        <button onclick="explainText()">
+            📖 Explain
+        </button>
+
+        <button onclick="generateQuiz()">
+            📝 Generate Quiz
+        </button>
+
+        <button onclick="summarizeText()">
+            📚 Summarize
+        </button>
+
+        <button
+            class="recommendation"
+            onclick="getRecommendations()"
+        >
+            🎯 Learning Recommendations
+        </button>
+
+    </div>
+
+    <div id="loading">
+        ⏳ AI is thinking...
+    </div>
+
+    <div id="answerBox">
+
+        <h3>✨ AI Answer</h3>
+
+        <div id="answer"></div>
+
+    </div>
+
+    <div class="footer">
+        Powered by Google Gemini • EduGenie AI
+    </div>
+
+</div>
+
+
+<script>
+
+function getText() {
+
+    const text = document.getElementById("question").value;
+
+    if (text.trim() === "") {
+
+        alert("Please enter something");
+
+        return null;
+    }
+
+    return text;
+}
+
+
+function showLoading() {
+
+    document.getElementById("loading").style.display = "block";
+
+    document.getElementById("answerBox").style.display = "none";
+}
+
+
+function showResult(result) {
+
+    document.getElementById("loading").style.display = "none";
+
+    document.getElementById("answer").innerText =
+        result || "No answer received.";
+
+    document.getElementById("answerBox").style.display = "block";
+}
+
+
+/* ASK GEMINI */
+
+async function askGemini() {
+
+    const text = getText();
+
+    if (!text) return;
+
+    showLoading();
+
+    const formData = new FormData();
+
+    formData.append("question", text);
+
+    try {
+
+        const response = await fetch("/ask", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        showResult(data.answer || data.detail);
+
+    } catch (error) {
+
+        showResult("Unable to connect to server.");
+
+    }
+}
+
+
+/* EXPLAIN */
+
+async function explainText() {
+
+    const text = getText();
+
+    if (!text) return;
+
+    showLoading();
+
+    try {
+
+        const response = await fetch("/explain", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                text: text
+            })
+        });
+
+        const data = await response.json();
+
+        showResult(data.result || data.detail);
+
+    } catch (error) {
+
+        showResult("Unable to connect to server.");
+
+    }
+}
+
+
+/* QUIZ */
+
+async function generateQuiz() {
+
+    const text = getText();
+
+    if (!text) return;
+
+    showLoading();
+
+    try {
+
+        const response = await fetch("/quiz", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                text: text
+            })
+        });
+
+        const data = await response.json();
+
+        showResult(data.result || data.detail);
+
+    } catch (error) {
+
+        showResult("Unable to connect to server.");
+
+    }
+}
+
+
+/* SUMMARIZE */
+
+async function summarizeText() {
+
+    const text = getText();
+
+    if (!text) return;
+
+    showLoading();
+
+    try {
+
+        const response = await fetch("/summarize", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                text: text
+            })
+        });
+
+        const data = await response.json();
+
+        showResult(data.result || data.detail);
+
+    } catch (error) {
+
+        showResult("Unable to connect to server.");
+
+    }
+}
+
+
+/* LEARNING RECOMMENDATIONS */
+
+async function getRecommendations() {
+
+    const text = getText();
+
+    if (!text) return;
+
+    showLoading();
+
+    try {
+
+        const response = await fetch(
+            "/learn/recommendations",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    text: text
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        showResult(data.result || data.detail);
+
+    } catch (error) {
+
+        showResult("Unable to connect to server.");
+
+    }
+}
+
+</script>
+
+</body>
+</html>
